@@ -1,44 +1,28 @@
-package com.example.zack.controller;
+package com.example.demo.controller;
 
-import com.example.zack.repo.ProductRepo;
-import com.example.zack.service.ScheduleCronService;
-import com.example.zack.tables.PreviousProductPurchases;
-import com.example.zack.tables.Products;
+
+import com.example.demo.tables.Products;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/schedule")
 @AllArgsConstructor
-public class ScheduleCronController{
-    private final ScheduleCronService scheduleCronService;
+public class ScheduleCronController {
     private final Resource templateResource = new ClassPathResource("templates/productsheet.docx");
     private final String outputDirectory = "templateoutput";
-    private final ProductRepo productRepo;
-    @PostMapping()
-    public  void addPreviousProductPurchases(){
-        scheduleCronService.addPreviousProductPurchases();
-    }
-    @GetMapping()
-    public List<PreviousProductPurchases> getPreviousProductPurchases(){
-        return scheduleCronService.getPreviousProductPurchases();
-    }
+
     @GetMapping("/generateProductSheet")
     public void generateProductSheet(HttpServletResponse response){
         try{
@@ -47,7 +31,12 @@ public class ScheduleCronController{
             }
             InputStream templateStream = templateResource.getInputStream();
             XWPFDocument templateDoc = new XWPFDocument(templateStream);
-            List<Products> products = (List<Products>) productRepo.findAll();
+            List<Products> products = Arrays.asList(
+                    new Products(1L, 10, 25.0, 15.0, "Electronics", 20.0, "Laptop"),
+                    new Products(2L, 20, 10.0, 5.0, "Clothing", 8.0, "T-Shirt"),
+                    new Products(3L, 5, 50.0, 35.0, "Electronics", 45.0, "Smartphone")
+            );
+
             XWPFTable table = findTableWithPlaceholders(templateDoc);
 
             if (table != null) {
@@ -120,7 +109,7 @@ public class ScheduleCronController{
         cells.get(3).setText(String.valueOf(product.getSellingPrice()));
         cells.get(4).setText(String.valueOf(product.getSellingPriceAtDebt()));
         cells.get(5).setText(product.getItem());
-        cells.get(6).setText(product.getCategory().getName());
+        cells.get(6).setText(product.getCategory());
     }
 
 }
