@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 
 import com.example.demo.tables.Products;
-
 import lombok.AllArgsConstructor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.core.io.ClassPathResource;
@@ -21,9 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/schedule")
+@RequestMapping(path = "api/v1/schedule2")
 @AllArgsConstructor
-public class ScheduleCronController {
+public class ScheduleController {
     private final Resource templateResource = new ClassPathResource("templates/productsheet.docx");
     private final String outputDirectory = "templateoutput";
 
@@ -64,7 +63,7 @@ public class ScheduleCronController {
             try {
                 // Create a print service
                 var defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
-
+                
 
                 if (defaultPrintService != null) {
                     // Create a print job
