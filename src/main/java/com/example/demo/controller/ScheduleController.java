@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,42 +55,20 @@ public class ScheduleController {
             String outputPath = "src/main/resources/" + outputDirectory + "/output.docx";
             FileOutputStream output = new FileOutputStream(outputPath);
             templateDoc.write(output);
+            output.close();
 
 
+            response.setHeader("Content-Disposition", "attachment; filename=output.docx");
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
+//            InputStream outputDocument = new FileInputStream(outputPath);
+//            FileCopyUtils.copy(outputDocument, response.getOutputStream());
             InputStream outputDocument = new FileInputStream(outputPath);
             FileCopyUtils.copy(outputDocument, response.getOutputStream());
 
 
-            try {
-                // Create a print service
-                var defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
-                
+            // Convert the document to a byte array and return it
 
-                if (defaultPrintService != null) {
-                    // Create a print job
-                    DocFlavor flavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
-
-                    // Wrap the outputDocument stream in a BufferedInputStream to prevent premature closure
-                    InputStream bufferedInputStream = new BufferedInputStream(outputDocument);
-                    Doc doc = new SimpleDoc(bufferedInputStream, flavor, null);
-
-                    PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
-                    DocPrintJob printJob = defaultPrintService.createPrintJob();
-                    printJob.print(doc, attributes);
-
-                    // Close the bufferedInputStream when the print job is completed
-                    bufferedInputStream.close();
-                } else {
-                    // Handle the case where no default print service is available
-                }
-            } catch (PrintException e) {
-                // Handle any printing exceptions
-                e.printStackTrace();
-            }
-
-            output.close();
-            response.setHeader("Content-Disposition", "attachment; filename=output.docx");
-            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         }catch (Exception e){
             e.printStackTrace();
         }
